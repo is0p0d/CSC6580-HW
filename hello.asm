@@ -13,7 +13,7 @@ global main
 
 section .text
 
-; NOTE: ebx is the exit status
+; NOTE: eax is the exit status
 
 main:
     push    rbp
