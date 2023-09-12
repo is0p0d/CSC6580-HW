@@ -72,3 +72,10 @@ arg_error:
     db      "ERROR: You must uspply a number and a string as arguments", 0
 
 section .note.GNU-stack noexec
+
+
+; COMPILATION ERROR: 
+; nasm -f elf64 "hello.asm" -o "hello.o" && gcc -o "hello" "hello.o" -fPIE
+; /usr/bin/ld: hello.o: relocation R_X86_64_32S against `.data' can not be used when making a PIE object; recompile with -fPIE
+; /usr/bin/ld: failed to set dynamic section sizes: bad value
+; collect2: error: ld returned 1 exit status
