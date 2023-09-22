@@ -45,7 +45,7 @@ main:
     ; open ye file fiend
     lea     rbx, [rel _GLOBAL_OFFSET_TABLE_]
     mov     rdi, [rsi+8]
-    mov     rsi, (db "rt", 0)
+    mov     rsi, "rt"
     lea     rdx, [rel main]
     mov     r9, fopen wrt ..got
     call    [rbx+r9]    ;fopen, result is a descriptor int in rax
@@ -66,7 +66,7 @@ main:
     cmp     rax, -1
     je      _fstat_err
 
-    mov     r13, QWORD PTR [rbp-0x70]   ; being honest, compiled a c program that
+    mov     r13, QWORD [rbp-0x70]   ; being honest, compiled a c program that
                                         ; only made the struct and accessed st_size
                                         ; this is the line that did it straight from that
     cmp     r13, 0
@@ -110,6 +110,21 @@ _writeloop:
     jne _writeloop
 
     ;get the HECK outta here!
+
+    ;free mem stored in r14
+    lea     rbx, [rel _GLOBAL_OFFSET_TABLE_]
+    mov     rdi, r14
+    lea     rsi, [rel main]
+    mov     r9, free wrt ..got
+    call    [rbx+r9]
+
+    ;close file stored at r12
+    lea     rbx, [rel _GLOBAL_OFFSET_TABLE_]
+    mov     rdi, r12
+    lea     rsi, [rel main]
+    mov     r9, free wrt ..got
+    call    [rbx+r9]
+
 
     pop r14
     pop r13
@@ -218,8 +233,8 @@ mg_argerr:
     db      "ERROR: main - You must supply an input file as an argument.", 0
 mg_fopenerr:
     db      "ERROR: fopen - Failed to open file.", 0
-mg_fstarterr:
-    db      "ERROR: fstat - reeeee", 0
+mg_fstaterr:
+    db      "ERROR: fstat - unable to get size", 0
 mg_zerofileerr:
     db      "ERROR: fstat - file has size of 0 bytes (somethin wrong here)", 0
 mg_mallocerr:
