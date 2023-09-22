@@ -7,6 +7,7 @@
 ; usage: ./reverse inputfile
 
 global main
+
 extern puts
 extern fopen
 extern fileno
@@ -59,9 +60,10 @@ main:
     push    r14 ; *content
 
     ; open ye file fiend
+    ; fopen call
     lea     rbx, [rel _GLOBAL_OFFSET_TABLE_]
     mov     rdi, [rsi+8]
-    mov     rsi, "rt"
+    lea     rsi, [rel fopen_arg] ; rt
     lea     rdx, [rel main]
     mov     r9, fopen wrt ..got
     call    [rbx+r9]    ;fopen, result is a descriptor int in rax
@@ -73,6 +75,7 @@ main:
     ; pass that to fstat to get file descriptor
     ; hoping i can get away without re push-pop'ing the register
     ; since i am overwriting them all anyway, we'll see.
+    ;fstat call
     lea     rbx, [rel _GLOBAL_OFFSET_TABLE_]
     mov     rdi, rax
     lea     rsi, [rel main]
@@ -88,7 +91,8 @@ main:
     cmp     r13, 0
     je      _zerofile_err
 
-    ;calling malloc the great
+    ; calling malloc the great
+    ; malloc call
     lea     rbx, [rel _GLOBAL_OFFSET_TABLE_]
     mov     rdi, r13
     lea     rsi, [rel main]
@@ -100,26 +104,27 @@ main:
     mov     r14, rax    ;save that pointer baybeeeeee
 
     ; your file is ready to be read, sire
+    ; fread call
     lea     rbx, [rel _GLOBAL_OFFSET_TABLE_]
     mov     rdi, r14
     mov     rsi, r13
     mov     rdx, 1
     mov     rcx, r12
     lea     r8, [rel main]
-    mov     r9, fopen wrt ..got
-    call    [rbx+r9]    ;fopen, result is a descriptor int in rax
+    mov     r9, fread wrt ..got
+    call    [rbx+r9]
     ; error checking
-    cmp     rax, 1      ;checking for C null
-    je      _fread_err
+    cmp     rax, 1
+    jne      _fread_err
 
 _writeloop:
-
+    ; write call
     lea     rbx, [rel _GLOBAL_OFFSET_TABLE_]
     mov     rdi, 1
     lea     rsi, [r14+r13-1]
     mov     rdx, 1
     mov     rcx, [rel main]
-    mov     r9, fopen wrt ..got
+    mov     r9, write wrt ..got
     call    [rbx+r9]    ;fopen, result is a descriptor int in rax
     dec r13
     cmp r13, 0
@@ -169,7 +174,7 @@ _print_exit:
     push    rbx
     push    rsi
     push    r9
-
+    ; puts call
     lea     rbx, [rel _GLOBAL_OFFSET_TABLE_]
     lea     rsi, [rel main]
     mov     r9, puts wrt ..got
@@ -197,5 +202,7 @@ mg_mallocerr:
     db      "ERROR: malloc - memory allocation failed", 0
 mg_freaderr:
     db      "ERROR: fread - failed to read file", 0
+fopen_arg:
+    db      "rt", 0
 
 section .not.GNU-stack noexec
