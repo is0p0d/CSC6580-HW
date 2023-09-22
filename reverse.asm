@@ -20,6 +20,22 @@ extern _GLOBAL_OFFSET_TABLE_
 
     section .text
 
+%macro      funcError 1
+; for use in error checking the return functions here
+%00:pop     r14
+    pop     r13
+    pop     r12
+    pop     r9
+    pop     rsi 
+    pop     rdi
+    pop     rdx
+    pop     rbx
+    pop     rax
+    push    rdi
+    lea     rdi, [rel %1]
+    jmp     _print_exit
+%endmacro
+
 main:
     push    rbp
     mov     rbp, rsp
@@ -144,71 +160,11 @@ _arg_err:
     push    rdi
     lea     rdi, [rel mg_argerr]
     jmp     _print_exit
-_fopen_err:
-    pop     r14
-    pop     r13
-    pop     r12
-    pop     r9
-    pop     rsi 
-    pop     rdi
-    pop     rdx
-    pop     rbx
-    pop     rax
-    push    rdi
-    lea     rdi, [rel mg_fopenerr]
-    jmp     _print_exit
-_fstat_err:
-    pop     r14
-    pop     r13
-    pop     r12
-    pop     r9
-    pop     rsi 
-    pop     rdi
-    pop     rdx
-    pop     rbx
-    pop     rax
-    push    rdi
-    lea     rdi, [rel mg_fstaterr]
-    jmp     _print_exit
-_zerofile_err:
-    pop     r14
-    pop     r13
-    pop     r12
-    pop     r9
-    pop     rsi 
-    pop     rdi
-    pop     rdx
-    pop     rbx
-    pop     rax
-    push    rdi
-    lea     rdi, [rel mg_zerofileerr]
-    jmp     _print_exit
-_malloc_err:
-    pop     r14
-    pop     r13
-    pop     r12
-    pop     r9
-    pop     rsi 
-    pop     rdi
-    pop     rdx
-    pop     rbx
-    pop     rax
-    push    rdi
-    lea     rdi, [rel mg_mallocerr]
-    jmp     _print_exit
-_fread_err:
-    pop     r14
-    pop     r13
-    pop     r12
-    pop     r9
-    pop     rsi 
-    pop     rdi
-    pop     rdx
-    pop     rbx
-    pop     rax
-    push    rdi
-    lea     rdi, [rel mg_freaderr]
-    jmp     _print_exit
+_fopen_err: funcError mg_fopenerr
+_fstat_err: funcError mg_fstaterr
+_zerofile_err: funcError mg_zerofileerr
+_malloc_err: funcError rel mg_mallocerr
+_fread_err: funcError rel mg_freaderr
 _print_exit:
     push    rbx
     push    rsi
